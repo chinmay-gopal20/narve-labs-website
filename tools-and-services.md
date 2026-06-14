@@ -2,13 +2,15 @@
 
 ## Overview
 
-| Service | Plan | Used For |
-|---------|------|----------|
-| **GoDaddy** | Paid | Domain registrar — owns `narvelabs.com` |
-| **Make.com** | Free | Automation — receives form submissions via webhook and triggers Airtable + email |
-| **Airtable** | Free | CRM database — stores every lead with name, email, message, UTM data, status |
-| **Resend** | Free (3,000 emails/month) | Email delivery — sends lead notification to `narvelabs@gmail.com` when form is submitted |
-| **Gmail** | Free | Receives lead notification emails at `narvelabs@gmail.com` |
+| Service | Account | Plan | Used For |
+|---------|---------|------|----------|
+| **GoDaddy** | Personal | Paid | Domain registrar — owns `narvelabs.com` |
+| **GitHub** | Personal (chinmay-gopal20) | Free | Source code — [narve-labs-website](https://github.com/chinmay-gopal20/narve-labs-website) |
+| **Vercel** | Personal | Free | Hosting & deployment |
+| **Make.com** | narvelabs@gmail.com | Free | Automation — receives form submissions via webhook and triggers Airtable + email |
+| **Airtable** | narvelabs@gmail.com | Free | CRM database — stores every lead with name, email, message, UTM data, status |
+| **Resend** | narvelabs@gmail.com | Free (3,000 emails/month) | Email delivery — sends lead notification to `narvelabs@gmail.com` when form is submitted |
+| **Gmail** | narvelabs@gmail.com | Free | Receives lead notification emails |
 
 ---
 
