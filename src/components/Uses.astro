@@ -1,0 +1,328 @@
+---
+interface UseCard {
+  emoji: string;
+  num: string;
+  title: string;
+  pain: string;
+  fix: string;
+  fixBold: string;
+  variant?: string;
+}
+
+const cards: UseCard[] = [
+  {
+    emoji: '🐶',
+    num: '01',
+    title: 'Vet clinics',
+    pain: 'Reception drowning in calls. Worried pet parents at midnight. Monday morning chaos.',
+    fixBold: 'We build',
+    fix: ' a 24/7 AI helpline trained on your clinic. It triages symptoms and books the fastest slot. Your front desk breathes again.',
+  },
+  {
+    emoji: '🏠',
+    num: '02',
+    title: 'Roofing and manufacturing',
+    pain: 'Field photos reviewed one by one. Approvals stuck in a WhatsApp thread.',
+    fixBold: 'We build',
+    fix: ' AI that checks photos against your standards and routes approvals automatically. Days become minutes.',
+  },
+  {
+    emoji: '🦷',
+    num: '03',
+    title: 'Dental and health practices',
+    pain: 'No shows killing the schedule. Patients on hold to ask one question.',
+    fixBold: 'We build',
+    fix: ' smart reminders, auto rebooking and an AI receptionist for the routine stuff.',
+  },
+  {
+    emoji: '🐜',
+    num: '04',
+    title: 'Pest control and home services',
+    pain: 'Leads going cold. Quotes typed out one by one.',
+    fixBold: 'We build',
+    fix: ' instant lead response and auto quoting. Every enquiry answered before your competitor wakes up.',
+  },
+  {
+    emoji: '📦',
+    num: '05',
+    title: 'Logistics and trades',
+    pain: 'Job updates in someone\'s head. Invoices chased manually. Paperwork eating evenings.',
+    fixBold: 'We build',
+    fix: ' automated job tracking, invoice chasing and customer updates. The admin does itself.',
+  },
+  {
+    emoji: '👋',
+    num: '06',
+    title: 'Your business here',
+    pain: 'If your team does anything twice a day that follows the same steps, it can probably be automated.',
+    fixBold: 'Tell us on a call.',
+    fix: ' Twenty minutes. If we cannot help, we will tell you that too.',
+    variant: 'u-last',
+  },
+];
+---
+
+<section class="uses" id="uses" aria-labelledby="uses-heading">
+  <div class="orb orb1" aria-hidden="true"></div>
+  <div class="orb orb2" aria-hidden="true"></div>
+  <div class="uses-pin" id="usesPin">
+    <div class="ghost" aria-hidden="true">SOLVED</div>
+    <div class="uses-head">
+      <div>
+        <div class="kicker">Who we build for</div>
+        <h2 id="uses-heading">Real businesses.<br /><em>Real boring problems. Solved.</em></h2>
+      </div>
+      <div class="hint" aria-hidden="true">Keep scrolling →</div>
+    </div>
+    <div class="uses-track" id="usesTrack">
+      {cards.map((card) => (
+        <article class={`ucard${card.variant ? ' ' + card.variant : ''}`}>
+          <div class="u-top">
+            <div class="u-emoji" aria-hidden="true">{card.emoji}</div>
+            <div class="u-num" aria-hidden="true">{card.num}</div>
+          </div>
+          <h5>{card.title}</h5>
+          <p class="pain">{card.pain}</p>
+          <p class="fix"><b>{card.fixBold}</b>{card.fix}</p>
+        </article>
+      ))}
+    </div>
+    <div class="uses-progress" role="progressbar" aria-label="Scroll progress">
+      <i id="usesProgress"></i>
+    </div>
+  </div>
+</section>
+
+<style>
+  .uses {
+    background: var(--color-purple-deep);
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(60px);
+  }
+
+  .orb1 {
+    top: -15%;
+    left: -8%;
+    width: 46vw;
+    height: 46vw;
+    background: rgba(124, 58, 237, 0.25);
+  }
+
+  .orb2 {
+    bottom: -25%;
+    right: -10%;
+    width: 40vw;
+    height: 40vw;
+    background: rgba(196, 181, 253, 0.12);
+  }
+
+  .ghost {
+    position: absolute;
+    bottom: -2%;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(120px, 22vw, 340px);
+    letter-spacing: -0.04em;
+    line-height: 0.8;
+    color: rgba(255, 255, 255, 0.025);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .uses-pin {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .uses-head {
+    padding: 0 clamp(24px, 5vw, 72px);
+    margin-bottom: 46px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 30px;
+    flex-wrap: wrap;
+  }
+
+  .kicker {
+    font-size: 12.5px;
+    font-weight: 500;
+    letter-spacing: 2.6px;
+    text-transform: uppercase;
+    color: #C4B5FD;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 36px;
+  }
+
+  .kicker::before {
+    content: '';
+    width: 30px;
+    height: 1.5px;
+    background: #C4B5FD;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(34px, 4.8vw, 64px);
+    letter-spacing: -0.03em;
+    line-height: 1.04;
+  }
+
+  h2 em {
+    font-style: normal;
+    color: #C4B5FD;
+  }
+
+  .hint {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding-bottom: 10px;
+  }
+
+  .uses-track {
+    display: flex;
+    gap: 22px;
+    padding: 0 clamp(24px, 5vw, 72px);
+    will-change: transform;
+    width: max-content;
+  }
+
+  .ucard {
+    width: min(400px, 78vw);
+    flex-shrink: 0;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+    border: 1px solid rgba(255, 255, 255, 0.13);
+    border-radius: 24px;
+    padding: 34px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.35s, transform 0.35s, box-shadow 0.35s;
+    --gx: 50%;
+    --gy: 50%;
+  }
+
+  .ucard::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(380px circle at var(--gx) var(--gy), rgba(196, 181, 253, 0.16), transparent 65%);
+    opacity: 0;
+    transition: opacity 0.35s;
+  }
+
+  .ucard:hover::before { opacity: 1; }
+
+  .ucard:hover {
+    border-color: rgba(196, 181, 253, 0.6);
+    transform: translateY(-8px);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+  }
+
+  .ucard > * { position: relative; }
+
+  .u-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .u-emoji {
+    width: 62px;
+    height: 62px;
+    border-radius: 18px;
+    font-size: 30px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s;
+  }
+
+  .ucard:hover .u-emoji {
+    transform: rotate(-8deg) scale(1.12);
+    background: rgba(124, 58, 237, 0.35);
+  }
+
+  .u-num {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 13px;
+    color: rgba(196, 181, 253, 0.7);
+    letter-spacing: 1px;
+  }
+
+  h5 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 25px;
+    letter-spacing: -0.4px;
+    margin-top: 6px;
+  }
+
+  .pain {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .fix {
+    font-size: 14.5px;
+    line-height: 1.6;
+    color: #E9D5FF;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    padding-top: 16px;
+    margin-top: auto;
+  }
+
+  .fix b {
+    color: #fff;
+    font-weight: 500;
+  }
+
+  .u-last {
+    background: linear-gradient(160deg, rgba(124, 58, 237, 0.4), rgba(124, 58, 237, 0.12));
+    border-color: rgba(196, 181, 253, 0.4);
+  }
+
+  .uses-progress {
+    margin: 46px clamp(24px, 5vw, 72px) 0;
+    height: 2px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+  }
+
+  .uses-progress i {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #7C3AED, #C4B5FD);
+    border-radius: 2px;
+  }
+</style>

@@ -1,0 +1,284 @@
+---
+---
+
+<section class="bento-wrap" id="services" aria-labelledby="services-heading">
+  <div class="bento-head">
+    <div>
+      <div class="kicker">What we do</div>
+      <h2 id="services-heading" class="reveal">We do the tech bit.<br /><em>You run the business.</em></h2>
+    </div>
+    <p class="reveal">Five things we are very good at. Most clients start with one and stay for the rest.</p>
+  </div>
+
+  <div class="bento">
+
+    <div class="tile tile-hero reveal" style="justify-content: space-between">
+      <div class="orbit" aria-hidden="true" style="position: absolute;"></div>
+      <span class="t-kick">The flagship</span>
+      <div>
+        <h3>AI agents. <em>They never call in sick.</em></h3>
+        <p>Trained on your business. They answer calls at 2am, qualify leads, book appointments and follow up with every enquiry. Politely. Every time.</p>
+      </div>
+    </div>
+
+    <div class="tile tile-stat tile-glowstat reveal">
+      <span class="big"><span data-count="30">0</span>+</span>
+      <p>Hours a week the average small team loses to work a robot should be doing.</p>
+    </div>
+
+    <div class="tile tile-lav reveal">
+      <span class="t-line" aria-hidden="true"></span>
+      <h3>Process audits</h3>
+      <p>We map where hours and money quietly leak out of your business. Then we plug it. Permanently.</p>
+    </div>
+
+    <div class="tile tile-vio reveal">
+      <span class="t-line" aria-hidden="true"></span>
+      <h3>Custom apps</h3>
+      <p>Portals, booking systems, dashboards. If you can describe it over coffee, we can build it.</p>
+    </div>
+
+    <div class="tile tile-soft reveal">
+      <span class="t-line" aria-hidden="true"></span>
+      <h3>Integrations</h3>
+      <p>Your CRM, calendar, inbox and invoicing. Finally talking to each other like adults.</p>
+    </div>
+
+    <div class="tile tile-wide tile-stat tile-glowstat reveal">
+      <span class="big"><span data-count="60">0</span>s</span>
+      <p>How fast a new lead expects a reply before they call the next name on Google. Our agents respond instantly. Yours can too.</p>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .bento-wrap {
+    padding: clamp(20px, 3vw, 40px) clamp(24px, 5vw, 72px) clamp(60px, 7vw, 100px);
+    max-width: 1240px;
+    margin: 0 auto;
+  }
+
+  .kicker {
+    font-size: 12.5px;
+    font-weight: 500;
+    letter-spacing: 2.6px;
+    text-transform: uppercase;
+    color: var(--color-purple-mid);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 36px;
+  }
+
+  .kicker::before {
+    content: '';
+    width: 30px;
+    height: 1.5px;
+    background: var(--color-purple-mid);
+  }
+
+  .bento-head {
+    margin-bottom: 64px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+
+  .bento-head h2 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(38px, 5.4vw, 72px);
+    letter-spacing: -0.03em;
+    line-height: 1.02;
+  }
+
+  .bento-head h2 em {
+    font-style: normal;
+    color: var(--color-purple-mid);
+  }
+
+  .bento-head p {
+    font-size: 16.5px;
+    color: var(--color-muted);
+    max-width: 34ch;
+    line-height: 1.6;
+    padding-bottom: 8px;
+  }
+
+  .bento {
+    display: grid;
+    gap: 18px;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: minmax(210px, auto);
+    perspective: 1400px;
+  }
+
+  .tile {
+    border: 1px solid var(--color-line);
+    border-radius: 24px;
+    padding: 34px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+    background: #fff;
+    transition: box-shadow 0.35s, border-color 0.35s;
+    transform-style: preserve-3d;
+    will-change: transform;
+    --gx: 50%;
+    --gy: 50%;
+  }
+
+  .tile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(420px circle at var(--gx) var(--gy), rgba(124, 58, 237, 0.13), transparent 65%);
+    opacity: 0;
+    transition: opacity 0.35s;
+    z-index: 0;
+  }
+
+  .tile:hover::before { opacity: 1; }
+  .tile > * { position: relative; z-index: 1; }
+
+  .tile:hover {
+    box-shadow: 0 30px 70px rgba(107, 33, 168, 0.16);
+    border-color: #C9B8E8;
+  }
+
+  .tile h3 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(21px, 1.9vw, 27px);
+    letter-spacing: -0.4px;
+    line-height: 1.1;
+  }
+
+  .tile p {
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--color-muted);
+    max-width: 36ch;
+  }
+
+  .tile .t-kick {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--color-purple-mid);
+    line-height: 1;
+  }
+
+  /* Hero tile */
+  .tile.tile-hero {
+    grid-column: span 2;
+    grid-row: span 2;
+    background: var(--color-purple-deep);
+    border-color: transparent;
+    color: #fff;
+    justify-content: space-between;
+  }
+
+  .tile-hero h3 {
+    font-size: clamp(28px, 2.8vw, 40px);
+    color: #fff;
+    max-width: 14ch;
+  }
+
+  .tile-hero h3 em {
+    font-style: normal;
+    color: #C4B5FD;
+  }
+
+  .tile-hero p { color: rgba(255, 255, 255, 0.6); max-width: 34ch; font-size: 15.5px; }
+  .tile-hero .t-kick { color: #C4B5FD; }
+
+  .orbit {
+    position: absolute;
+    top: -30%;
+    right: -28%;
+    width: 78%;
+    aspect-ratio: 1;
+    border: 1px solid rgba(196, 181, 253, 0.25);
+    border-radius: 50%;
+  }
+
+  .orbit::before {
+    content: '';
+    position: absolute;
+    inset: 18%;
+    border: 1px solid rgba(196, 181, 253, 0.18);
+    border-radius: 50%;
+  }
+
+  .orbit::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -4px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--color-purple-mid);
+    box-shadow: 0 0 18px rgba(124, 58, 237, 0.9);
+  }
+
+  .tile-hero:hover .orbit { animation: spin 14s linear infinite; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Stat tile */
+  .tile-stat { align-items: flex-start; justify-content: space-between; }
+
+  .tile-stat .big {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(54px, 5.5vw, 84px);
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--color-purple-mid);
+  }
+
+  /* Colour variants */
+  .tile-soft { background: linear-gradient(145deg, #F3EEFB, #E9DEFA); border-color: transparent; }
+  .tile-lav { background: linear-gradient(150deg, #EDE4FA, #DCCBF6); border-color: transparent; }
+  .tile-lav h3 { color: #4C1D95; }
+  .tile-vio { background: linear-gradient(160deg, #7C3AED, #6021A8); border-color: transparent; color: #fff; }
+  .tile-vio h3 { color: #fff; }
+  .tile-vio p { color: rgba(255, 255, 255, 0.75); }
+  .tile-vio .t-line { background: #E9D5FF; }
+  .tile-vio::before { background: radial-gradient(420px circle at var(--gx) var(--gy), rgba(255, 255, 255, 0.18), transparent 65%); }
+  .tile-stat.tile-glowstat { background: linear-gradient(150deg, #FBFAFE, #F1EAFB); }
+  .tile-hero::before { background: radial-gradient(480px circle at var(--gx) var(--gy), rgba(196, 181, 253, 0.22), transparent 65%); }
+  .tile-wide { grid-column: span 2; }
+
+  .tile .t-line {
+    position: absolute;
+    top: 34px;
+    left: 34px;
+    width: 34px;
+    height: 2px;
+    background: var(--color-purple-mid);
+    border-radius: 2px;
+  }
+
+  @media (max-width: 980px) {
+    .bento { grid-template-columns: repeat(2, 1fr); }
+    .tile.tile-hero { grid-column: span 2; }
+  }
+
+  @media (max-width: 768px) {
+    .bento { grid-template-columns: 1fr; }
+    .tile.tile-hero { grid-column: span 1; grid-row: span 1; }
+    .tile-wide { grid-column: span 1; }
+  }
+</style>

@@ -1,0 +1,50 @@
+---
+const items = [
+  'AI phone agents',
+  'Appointment booking that books itself',
+  'Workflow automation',
+  'Custom apps',
+  'Process audits',
+  'Lead follow up on autopilot',
+];
+---
+
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track" id="marqueeTrack">
+    {items.map((item) => (
+      <span class="marquee-item">{item}</span>
+    ))}
+  </div>
+</div>
+
+<style>
+  .marquee {
+    border-top: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    padding: 20px 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .marquee-track {
+    display: inline-flex;
+    gap: 64px;
+    will-change: transform;
+  }
+
+  .marquee-item {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--color-muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 64px;
+  }
+
+  .marquee-item::after {
+    content: '✦';
+    color: var(--color-purple-mid);
+    font-size: 12px;
+  }
+</style>

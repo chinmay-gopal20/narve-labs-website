@@ -1,0 +1,227 @@
+---
+---
+
+<header class="hero">
+  <canvas id="hero3d" aria-hidden="true"></canvas>
+  <div class="hero-orb hero-orb-1" aria-hidden="true"></div>
+  <div class="hero-orb hero-orb-2" aria-hidden="true"></div>
+  <div class="hero-orb hero-orb-3" aria-hidden="true"></div>
+
+  <div class="hero-content">
+    <h1>
+      <span class="line"><span>Your team is doing</span></span>
+      <span class="line"><span><span class="strike">robot work.<i aria-hidden="true"></i></span></span></span>
+      <span class="line"><span>We build the <span class="accent">robots.</span></span></span>
+    </h1>
+    <div class="hero-bottom">
+      <p class="hero-sub">
+        Custom AI agents and automation for small businesses. The repetitive stuff your team hates?
+        <strong>That is our whole job.</strong>
+      </p>
+      <div class="hero-ctas">
+        <a href="#cta" class="btn btn-solid">Let's Talk →</a>
+        <a href="#services" class="btn btn-ghost">See what we do</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<style>
+  .hero {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 140px clamp(24px, 5vw, 72px) 70px;
+    position: relative;
+  }
+
+  #hero3d {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: min(52vw, 760px);
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+    -webkit-mask-image: radial-gradient(ellipse 90% 88% at 62% 50%, black 65%, transparent 100%);
+    mask-image: radial-gradient(ellipse 90% 88% at 62% 50%, black 65%, transparent 100%);
+  }
+
+  .hero-orb {
+    display: none;
+  }
+
+  @media (max-width: 640px) {
+    .hero {
+      padding-top: 90px;
+      padding-bottom: 48px;
+    }
+
+    #hero3d {
+      display: none;
+    }
+
+    .hero-orb {
+      display: block;
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .hero-orb-1 {
+      width: 70vw;
+      height: 70vw;
+      top: -5vw;
+      right: -16vw;
+      background: radial-gradient(circle, rgba(124, 58, 237, 0.22) 0%, rgba(109, 40, 217, 0.08) 55%, transparent 100%);
+      filter: blur(60px);
+    }
+
+    .hero-orb-2 {
+      width: 50vw;
+      height: 50vw;
+      top: 28%;
+      right: 4vw;
+      background: radial-gradient(circle, rgba(167, 139, 250, 0.18) 0%, transparent 70%);
+      filter: blur(44px);
+    }
+
+    .hero-orb-3 {
+      width: 44vw;
+      height: 44vw;
+      bottom: 12%;
+      left: -10vw;
+      background: radial-gradient(circle, rgba(91, 33, 182, 0.14) 0%, transparent 70%);
+      filter: blur(52px);
+    }
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-purple-mid);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.6); opacity: 0.5; }
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(46px, 8vw, 114px);
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+    max-width: 15ch;
+  }
+
+  .line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.07em;
+    margin-bottom: -0.07em;
+  }
+
+  .line > span {
+    display: block;
+    transform: translateY(115%);
+  }
+
+  .accent {
+    color: var(--color-purple-mid);
+  }
+
+  .strike {
+    position: relative;
+    white-space: nowrap;
+  }
+
+  .strike i {
+    position: absolute;
+    left: -2%;
+    top: 54%;
+    height: 0.09em;
+    width: 0;
+    background: var(--color-purple-mid);
+    border-radius: 4px;
+  }
+
+  .hero-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 40px;
+    margin-top: 60px;
+    flex-wrap: wrap;
+  }
+
+  .hero-sub {
+    font-size: clamp(17px, 1.5vw, 20px);
+    line-height: 1.6;
+    color: var(--color-muted);
+    max-width: 40ch;
+    opacity: 0;
+  }
+
+  .hero-sub strong {
+    color: var(--color-ink);
+    font-weight: 500;
+  }
+
+  .hero-ctas {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    opacity: 0;
+  }
+
+  .btn {
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    border: none;
+  }
+
+  .btn-solid {
+    background: var(--color-purple);
+    color: #fff;
+    padding: 17px 32px;
+    border-radius: 100px;
+    box-shadow: 0 10px 30px rgba(107, 33, 168, 0.22);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s, background 0.25s;
+  }
+
+  .btn-solid:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 40px rgba(107, 33, 168, 0.32);
+    background: var(--color-purple-mid);
+  }
+
+  .btn-ghost {
+    color: var(--color-ink);
+    padding: 17px 6px;
+    border-bottom: 1.5px solid var(--color-ink);
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .btn-ghost:hover {
+    color: var(--color-purple-mid);
+    border-color: var(--color-purple-mid);
+  }
+</style>

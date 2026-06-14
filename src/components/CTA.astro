@@ -1,0 +1,93 @@
+---
+---
+
+<section class="cta" id="cta" aria-labelledby="cta-heading">
+  <h2 id="cta-heading" class="reveal">Let's fix<br /><em>your Mondays.</em></h2>
+  <p class="reveal">One free call. You talk, we listen, and you leave with at least one idea worth stealing. Even if you never hire us.</p>
+  <a href="mailto:hello@narvelabs.com" class="btn btn-solid reveal">Book your free 20 min call →</a>
+  <div class="micro reveal">No pitch decks. No pressure.</div>
+</section>
+
+<style>
+  .cta {
+    background: var(--color-ink);
+    color: #fff;
+    padding: clamp(140px, 18vw, 230px) clamp(24px, 5vw, 72px);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta::before {
+    content: '';
+    position: absolute;
+    bottom: -40%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80vw;
+    height: 80vw;
+    max-width: 1100px;
+    max-height: 1100px;
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.22), transparent 62%);
+    pointer-events: none;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(44px, 8vw, 110px);
+    letter-spacing: -0.035em;
+    line-height: 1;
+    margin-bottom: 28px;
+    position: relative;
+  }
+
+  h2 em {
+    font-style: normal;
+    color: var(--color-purple-mid);
+  }
+
+  p {
+    font-size: clamp(16px, 1.5vw, 19px);
+    color: rgba(255, 255, 255, 0.6);
+    max-width: 42ch;
+    margin: 0 auto 48px;
+    line-height: 1.65;
+    position: relative;
+  }
+
+  .btn {
+    font-family: var(--font-body);
+    font-size: 17px;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    border: none;
+  }
+
+  .btn-solid {
+    background: var(--color-purple);
+    color: #fff;
+    padding: 20px 42px;
+    border-radius: 100px;
+    box-shadow: 0 10px 30px rgba(107, 33, 168, 0.22);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s, background 0.25s;
+    position: relative;
+  }
+
+  .btn-solid:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 40px rgba(107, 33, 168, 0.32);
+    background: var(--color-purple-mid);
+  }
+
+  .micro {
+    margin-top: 24px;
+    font-size: 13.5px;
+    color: rgba(255, 255, 255, 0.38);
+    position: relative;
+  }
+</style>
