@@ -4,7 +4,8 @@
 <section class="manifesto" aria-labelledby="manifesto-text">
   <p id="manifestoText">
     Every small business has one. The task nobody was hired for, that somehow eats everyone's week.
-    <span class="pop">We automate it with AI.</span> Your team gets their time back. You get your margins back.
+    <span class="pop">We automate it with AI.</span>
+    Your team gets their time back. You get your margins back.
   </p>
 </section>
 
@@ -24,6 +25,11 @@
   }
 
   :global(#manifestoText .pop) {
-    color: var(--color-purple-mid);
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block;
+    font-size: 1.12em;
   }
 </style>

@@ -7,11 +7,13 @@ const items = [
   'Process audits',
   'Lead follow up on autopilot',
 ];
+// Triple the items at build time so JS doesn't mutate the DOM after first paint (avoids CLS).
+const repeated = [...items, ...items, ...items];
 ---
 
 <div class="marquee" aria-hidden="true">
   <div class="marquee-track" id="marqueeTrack">
-    {items.map((item) => (
+    {repeated.map((item) => (
       <span class="marquee-item">{item}</span>
     ))}
   </div>

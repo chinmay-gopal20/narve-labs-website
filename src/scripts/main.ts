@@ -1,17 +1,27 @@
-// All GSAP + Three.js animations — mirrors the original HTML script exactly.
-// GSAP and THREE are loaded via CDN before this script, so we declare them.
+// GSAP and ScrollTrigger are loaded via CDN defer before this module runs.
 declare const gsap: any;
 declare const ScrollTrigger: any;
-declare const THREE: any;
 
 gsap.registerPlugin(ScrollTrigger);
 
-/* ── 3D ELEMENT (minimal wireframe, slow, mouse aware) ── */
+/* ── 3D ELEMENT — lazy-loaded so Three.js (~600 KiB) never blocks main thread ── */
 let mesh: any, inner: any;
 
-(function init3d() {
+function loadThree(): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+    s.onload = () => resolve((window as any).THREE);
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+async function init3d() {
   const canvas = document.getElementById('hero3d') as HTMLCanvasElement;
   if (!canvas) return;
+
+  const THREE = await loadThree();
 
   const scene = new THREE.Scene();
   const w = canvas.clientWidth || 600;
@@ -63,7 +73,10 @@ let mesh: any, inner: any;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false);
   });
-})();
+}
+
+// Fire and forget — Three.js loads in the background while GSAP animations run.
+init3d();
 
 /* Extra rotation tied to scroll */
 ScrollTrigger.create({
@@ -78,6 +91,11 @@ ScrollTrigger.create({
 });
 
 /* ── HERO INTRO (immediate — no preloader) ── */
+// Set initial states here rather than in CSS so content is visible before JS loads (better FCP).
+gsap.set('.hero h1 .line > span', { y: '115%' });
+gsap.set('.hero-sub', { opacity: 0 });
+gsap.set('.hero-ctas', { opacity: 0 });
+
 gsap.timeline({ delay: 0.1 })
   .to('.hero h1 .line > span', { y: 0, duration: 1.1, ease: 'power4.out', stagger: 0.1 })
   .to('.hero-eyebrow', { opacity: 1, duration: 0.7 }, '-=.8')
@@ -95,9 +113,9 @@ ScrollTrigger.create({
 });
 
 /* ── MARQUEE ── */
+// Items are pre-tripled in the Astro template so no DOM mutation happens after first paint.
 const track = document.getElementById('marqueeTrack');
 if (track) {
-  track.innerHTML += track.innerHTML + track.innerHTML;
   let mqx = 0;
   gsap.ticker.add(() => {
     mqx -= 0.7;
@@ -135,7 +153,14 @@ if (mt) {
       opacity: 1,
       stagger: 0.05,
       ease: 'none',
-      scrollTrigger: { trigger: '.manifesto', start: 'top 65%', end: 'top 5%', scrub: true },
+      scrollTrigger: {
+        trigger: '.manifesto',
+        start: 'top 15%',
+        end: '+=800',
+        pin: true,
+        anticipatePin: 1,
+        scrub: 1.2,
+      },
     }
   );
 }
