@@ -1,0 +1,935 @@
+---
+---
+
+<div class="booking-modal" id="booking-modal" role="dialog" aria-modal="true" aria-label="Book a Discovery Call">
+  <div class="modal-backdrop" id="modal-backdrop"></div>
+  <div class="modal-card">
+
+    <button class="modal-close" id="close-booking" aria-label="Close">✕</button>
+
+    <!-- Step 1: Pick a slot -->
+    <div class="step" id="step-pick">
+      <div class="modal-header">
+        <p class="modal-label">Discovery Call · 20 min · Google Meet</p>
+        <h3>Pick a time</h3>
+      </div>
+
+      <div class="timezone-row">
+        <span class="tz-icon">🕐</span>
+        <div class="tz-dropdown" id="tz-dropdown">
+          <button
+            id="tz-trigger"
+            class="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 transition-colors cursor-pointer bg-transparent border-none outline-none"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+          >
+            <span id="tz-value"></span>
+            <svg class="w-3 h-3 opacity-50 shrink-0" viewBox="0 0 12 12" fill="none">
+              <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div id="tz-panel" class="tz-panel hidden absolute z-50 mt-2 w-64 bg-[#0f0d1a] border border-white/[0.07] rounded-2xl shadow-[0_24px_60px_rgba(0,0,0,0.6)] overflow-hidden">
+            <div class="px-2 pt-2 pb-1.5">
+              <input
+                id="tz-search"
+                type="text"
+                placeholder="Search..."
+                class="w-full bg-white/[0.04] text-white/80 text-xs placeholder-white/20 rounded-lg px-3 py-1.5 outline-none border border-transparent focus:border-purple-500/40 transition-colors"
+              />
+            </div>
+            <ul id="tz-list" class="max-h-48 overflow-y-auto pb-2" role="listbox"></ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Day strip -->
+      <div class="day-strip-wrap">
+        <button class="strip-nav" id="prev-week" aria-label="Previous week">‹</button>
+        <div class="day-strip" id="day-strip"></div>
+        <button class="strip-nav" id="next-week" aria-label="Next week">›</button>
+      </div>
+
+      <!-- Slots grid -->
+      <div class="slots-wrap">
+        <div class="slots-loading" id="slots-loading">
+          <div class="spinner"></div>
+          <p class="slots-loading-text" id="slots-loading-text"></p>
+        </div>
+        <div class="slots-grid" id="slots-grid"></div>
+        <p class="slots-empty" id="slots-empty">No available times on this day.</p>
+      </div>
+    </div>
+
+    <!-- Booking loader overlay -->
+    <div class="booking-loader" id="booking-loader">
+      <div class="loader-ring"></div>
+      <p class="loader-text" id="loader-text"></p>
+    </div>
+
+    <!-- Step 2: Success -->
+    <div class="step" id="step-success">
+      <div class="success-wrap">
+        <div class="success-icon">✓</div>
+        <h3>You're booked.</h3>
+        <p id="success-detail"></p>
+        <p class="success-note">Check your email for the Google Meet link.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const DAY_NAMES  = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+  const modal        = document.getElementById('booking-modal')!;
+  const backdrop     = document.getElementById('modal-backdrop')!;
+  const closeBtn     = document.getElementById('close-booking')!;
+  const stepPick     = document.getElementById('step-pick')!;
+  const stepSuccess  = document.getElementById('step-success')!;
+  const dayStrip     = document.getElementById('day-strip')!;
+  const slotsGrid    = document.getElementById('slots-grid')!;
+  const slotsLoading = document.getElementById('slots-loading')!;
+  const slotsEmpty   = document.getElementById('slots-empty')!;
+  const prevWeek     = document.getElementById('prev-week')!;
+  const nextWeek     = document.getElementById('next-week')!;
+  const tzDropdown   = document.getElementById('tz-dropdown')!;
+  const tzTrigger    = document.getElementById('tz-trigger') as HTMLButtonElement;
+  const tzPanel      = document.getElementById('tz-panel')!;
+  const tzValue      = document.getElementById('tz-value')!;
+  const tzSearch     = document.getElementById('tz-search') as HTMLInputElement;
+  const tzList       = document.getElementById('tz-list')!;
+  const successDetail  = document.getElementById('success-detail')!;
+  const bookingLoader  = document.getElementById('booking-loader')!;
+  const loaderText     = document.getElementById('loader-text')!;
+
+  const slotsLoadingText = document.getElementById('slots-loading-text')!;
+
+  const SLOT_MESSAGES = [
+    'Checking what\'s free...',
+    'Peeking at the calendar...',
+    'Counting available hours...',
+    'Won\'t take long, promise...',
+  ];
+
+  const LOADER_MESSAGES = [
+    'Bribing the calendar gods...',
+    'Convincing the servers to wake up...',
+    'Checking if this slot is too good to be true...',
+    'Herding time zones into formation...',
+    'Asking Google Meet to please show up on time...',
+    'Negotiating with the space-time continuum...',
+    'Making sure nobody else grabbed your spot...',
+    'Telling the robots you\'re coming...',
+    'Double-checking you didn\'t pick a Monday...',
+    'Almost there, we promise...',
+  ];
+
+  let slotMsgInterval: ReturnType<typeof setInterval> | null = null;
+  let loaderInterval: ReturnType<typeof setInterval> | null = null;
+
+  function startCycling(msgs: string[], textEl: HTMLElement, delay: number): ReturnType<typeof setInterval> {
+    let i = 0;
+    textEl.textContent = msgs[0];
+    return setInterval(() => {
+      i = (i + 1) % msgs.length;
+      textEl.classList.add('fade-out');
+      setTimeout(() => {
+        textEl.textContent = msgs[i];
+        textEl.classList.remove('fade-out');
+      }, 200);
+    }, delay);
+  }
+
+  function showSlotsLoader() { slotMsgInterval = startCycling(SLOT_MESSAGES, slotsLoadingText, 1800); }
+  function hideSlotsLoader() { if (slotMsgInterval) { clearInterval(slotMsgInterval); slotMsgInterval = null; } }
+
+  function showLoader() {
+    bookingLoader.classList.add('active');
+    loaderInterval = startCycling(LOADER_MESSAGES, loaderText, 2200);
+  }
+
+  function hideLoader() {
+    if (loaderInterval) { clearInterval(loaderInterval); loaderInterval = null; }
+    bookingLoader.classList.remove('active');
+  }
+
+  let userTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  let weekOffset = 0;
+  let selectedDay = '';
+  let prefillEmail = '';
+  let allSlots: Record<string, string[]> = {};
+
+  let allZones: string[] = [];
+
+  function populateTzSelect() {
+    allZones = (Intl as any).supportedValuesOf?.('timeZone') ?? [userTZ];
+    tzValue.textContent = userTZ.replace(/_/g, ' ');
+    renderTzList(allZones);
+  }
+
+  function renderTzList(zones: string[]) {
+    tzList.innerHTML = '';
+    zones.forEach(tz => {
+      const li = document.createElement('li');
+      li.className = 'tz-option' + (tz === userTZ ? ' tz-option--active' : '');
+      li.textContent = tz.replace(/_/g, ' ');
+      li.dataset.tz = tz;
+      li.setAttribute('role', 'option');
+      li.addEventListener('click', () => selectTz(tz));
+      tzList.appendChild(li);
+    });
+  }
+
+  function selectTz(tz: string) {
+    userTZ = tz;
+    tzValue.textContent = tz.replace(/_/g, ' ');
+    tzList.querySelectorAll('.tz-option').forEach(el => el.classList.toggle('tz-option--active', (el as HTMLElement).dataset.tz === tz));
+    closeTzPanel();
+    allSlots = {};
+    loadSlots();
+  }
+
+  function openTzPanel() {
+    tzPanel.classList.remove('hidden');
+    tzTrigger.setAttribute('aria-expanded', 'true');
+    tzSearch.value = '';
+    renderTzList(allZones);
+    tzSearch.focus();
+    const active = tzList.querySelector('.tz-option--active');
+    if (active) active.scrollIntoView({ block: 'center' });
+  }
+
+  function closeTzPanel() {
+    tzPanel.classList.add('hidden');
+    tzTrigger.setAttribute('aria-expanded', 'false');
+  }
+
+  tzTrigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    tzPanel.classList.contains('hidden') ? openTzPanel() : closeTzPanel();
+  });
+
+  tzSearch.addEventListener('input', () => {
+    const q = tzSearch.value.toLowerCase();
+    renderTzList(allZones.filter(tz => tz.toLowerCase().replace(/_/g, ' ').includes(q)));
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!tzDropdown.contains(e.target as Node)) closeTzPanel();
+  });
+
+  tzDropdown.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeTzPanel();
+  });
+
+  function nameFromEmail(email: string): string {
+    const local = email.split('@')[0];
+    return local.replace(/[._-]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────
+
+  function toLocalDateKey(utcStr: string): string {
+    const d = new Date(utcStr);
+    const y = d.toLocaleDateString('en-CA', { timeZone: userTZ, year: 'numeric' });
+    const m = d.toLocaleDateString('en-CA', { timeZone: userTZ, month: '2-digit' });
+    const day = d.toLocaleDateString('en-CA', { timeZone: userTZ, day: '2-digit' });
+    return `${y}-${m}-${day}`;
+  }
+
+  function formatTime(utcStr: string): string {
+    return new Date(utcStr).toLocaleTimeString('en-US', {
+      timeZone: userTZ,
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+  }
+
+  function formatDisplayDate(dateKey: string): string {
+    const [y, m, d] = dateKey.split('-').map(Number);
+    const date = new Date(y, m - 1, d);
+    return `${DAY_NAMES[date.getDay()]}, ${MONTH_NAMES[m - 1]} ${d}`;
+  }
+
+  function getWeekDays(offset: number): Date[] {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const days: Date[] = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + offset * 7 + i);
+      days.push(d);
+    }
+    return days;
+  }
+
+  function dateKey(d: Date): string {
+    return d.toLocaleDateString('en-CA', { year: 'numeric', month: '2-digit', day: '2-digit' });
+  }
+
+  // ── Fetch slots for current week ─────────────────────────────
+
+  async function loadSlots() {
+    slotsGrid.innerHTML = '';
+    slotsLoading.style.display = 'flex';
+    slotsEmpty.style.display = 'none';
+    showSlotsLoader();
+
+    const days = getWeekDays(weekOffset);
+    const start = days[0].toISOString();
+    const endDate = new Date(days[6]);
+    endDate.setDate(endDate.getDate() + 1);
+    const end = endDate.toISOString();
+
+    try {
+      const res = await fetch(`/api/slots?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`);
+      const json = await res.json();
+
+      allSlots = {};
+      const raw: Record<string, { start: string }[]> = json.data || {};
+      for (const [, slots] of Object.entries(raw)) {
+        for (const s of slots) {
+          const key = toLocalDateKey(s.start);
+          if (!allSlots[key]) allSlots[key] = [];
+          allSlots[key].push(s.start);
+        }
+      }
+    } catch {
+      allSlots = {};
+    }
+
+    hideSlotsLoader();
+    slotsLoading.style.display = 'none';
+    renderDayStrip();
+
+    // Auto-select first available day
+    const days2 = getWeekDays(weekOffset);
+    const firstAvailable = days2.find(d => allSlots[dateKey(d)]?.length);
+    const target = firstAvailable ? dateKey(firstAvailable) : dateKey(days2[0]);
+    selectDay(target);
+  }
+
+  // ── Day strip ────────────────────────────────────────────────
+
+  function renderDayStrip() {
+    dayStrip.innerHTML = '';
+    const days = getWeekDays(weekOffset);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (const d of days) {
+      const key = dateKey(d);
+      const hasSlots = (allSlots[key]?.length ?? 0) > 0;
+      const isPast = d < today;
+
+      const btn = document.createElement('button');
+      btn.className = 'day-btn' + (isPast ? ' past' : '') + (!hasSlots ? ' no-slots' : '');
+      btn.dataset.key = key;
+      btn.disabled = isPast;
+      btn.innerHTML = `
+        <span class="day-name">${DAY_NAMES[d.getDay()]}</span>
+        <span class="day-num">${d.getDate()}</span>
+        ${hasSlots ? '<span class="day-dot"></span>' : ''}
+      `;
+      btn.addEventListener('click', () => selectDay(key));
+      dayStrip.appendChild(btn);
+    }
+  }
+
+  function selectDay(key: string) {
+    selectedDay = key;
+
+    dayStrip.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+    dayStrip.querySelector(`[data-key="${key}"]`)?.classList.add('active');
+
+    renderSlots(key);
+  }
+
+  // ── Slots grid ───────────────────────────────────────────────
+
+  function renderSlots(key: string) {
+    slotsGrid.innerHTML = '';
+    const slots = allSlots[key] || [];
+
+    if (!slots.length) {
+      slotsEmpty.style.display = 'block';
+      return;
+    }
+    slotsEmpty.style.display = 'none';
+
+    for (const utcStr of slots) {
+      const timeLabel = formatTime(utcStr);
+      const btn = document.createElement('button');
+      btn.className = 'slot-btn';
+      btn.dataset.utc = utcStr;
+      btn.innerHTML = `<span class="slot-time">${timeLabel}</span><span class="slot-confirm">Confirm ${timeLabel}</span>`;
+      btn.addEventListener('click', () => pickSlot(utcStr, btn, timeLabel));
+      slotsGrid.appendChild(btn);
+    }
+  }
+
+  async function pickSlot(utcStr: string, slotBtn: HTMLButtonElement, label: string) {
+    slotBtn.classList.add('loading');
+    slotsGrid.querySelectorAll('.slot-btn').forEach(b => (b as HTMLButtonElement).disabled = true);
+    showLoader();
+
+    try {
+      const res = await fetch('/api/book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          start: utcStr,
+          name: nameFromEmail(prefillEmail) || 'Guest',
+          email: prefillEmail || 'noreply@narvelabs.com',
+          timeZone: userTZ,
+        }),
+      });
+      const data = await res.json();
+
+      if (!res.ok || data.status === 'error') {
+        throw new Error(data?.error?.message || 'Booking failed.');
+      }
+
+      hideLoader();
+      const dateStr = formatDisplayDate(selectedDay);
+      successDetail.textContent = `${dateStr} at ${label}`;
+      showStep(stepSuccess);
+    } catch (err: any) {
+      hideLoader();
+      slotsGrid.querySelectorAll('.slot-btn').forEach(b => (b as HTMLButtonElement).disabled = false);
+      slotBtn.classList.remove('loading');
+      const errEl = document.createElement('p');
+      errEl.className = 'slots-error';
+      errEl.textContent = err.message || 'Something went wrong. Please try again.';
+      slotsGrid.insertAdjacentElement('afterend', errEl);
+      setTimeout(() => errEl.remove(), 4000);
+    }
+  }
+
+  // ── Navigation ───────────────────────────────────────────────
+
+  prevWeek.addEventListener('click', () => { if (weekOffset > 0) { weekOffset--; loadSlots(); } });
+  nextWeek.addEventListener('click', () => { weekOffset++; loadSlots(); });
+
+  // ── Modal open/close ─────────────────────────────────────────
+
+  function showStep(el: HTMLElement) {
+    [stepPick, stepSuccess].forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function openModal(email = '') {
+    prefillEmail = email;
+    weekOffset = 0;
+    if (!allZones.length) populateTzSelect();
+    showStep(stepPick);
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    requestAnimationFrame(() => modal.classList.add('visible'));
+    loadSlots();
+  }
+
+  function closeModal() {
+    modal.classList.remove('visible');
+    document.body.style.overflow = '';
+    setTimeout(() => modal.classList.remove('open'), 300);
+  }
+
+  document.addEventListener('open-booking', (e: Event) => {
+    const detail = (e as CustomEvent).detail;
+    openModal(detail?.email || '');
+  });
+
+  closeBtn.addEventListener('click', closeModal);
+  backdrop.addEventListener('click', closeModal);
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.classList.contains('open')) closeModal();
+  });
+</script>
+
+<style is:global>
+  /* ── Modal shell ─────────────────────────────────────────── */
+  .booking-modal { display: none; }
+
+  .booking-modal.open {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .booking-modal.open.visible { opacity: 1; }
+
+  .modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .modal-card {
+    position: relative;
+    z-index: 1;
+    background: #0f0d1a;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 40px;
+    color: #fff;
+    transform: translateY(24px);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(124,58,237,0.1);
+  }
+
+  .booking-modal.open.visible .modal-card { transform: translateY(0); }
+
+  .modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255,255,255,0.06);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    color: rgba(255,255,255,0.5);
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .modal-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+  /* ── Steps ───────────────────────────────────────────────── */
+  .step { display: none; }
+  .step.active { display: block; }
+
+  /* ── Header ──────────────────────────────────────────────── */
+  .modal-header { margin-bottom: 28px; }
+
+  .modal-label {
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-purple-mid);
+    margin-bottom: 8px;
+  }
+
+  .modal-header h3 {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 4vw, 36px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+  }
+
+  /* ── Timezone ────────────────────────────────────────────── */
+  .timezone-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  .tz-dropdown {
+    position: relative;
+  }
+
+  .tz-option {
+    padding: 7px 12px;
+    font-size: 12.5px;
+    color: rgba(255,255,255,0.45);
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+    list-style: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-radius: 8px;
+    margin: 0 6px;
+  }
+
+  .tz-option:hover {
+    background: rgba(255,255,255,0.05);
+    color: rgba(255,255,255,0.85);
+  }
+
+  .tz-option--active {
+    color: var(--color-purple-mid);
+    background: rgba(124,58,237,0.12);
+  }
+
+  /* Scrollbar styling for tz list */
+  #tz-list::-webkit-scrollbar { width: 4px; }
+  #tz-list::-webkit-scrollbar-track { background: transparent; }
+  #tz-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+  #tz-list::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+
+  /* ── Day strip ───────────────────────────────────────────── */
+  .day-strip-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+
+  .strip-nav {
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    color: rgba(255,255,255,0.5);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .strip-nav:hover { background: rgba(255,255,255,0.1); color: #fff; }
+
+  .day-strip {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    flex: 1;
+  }
+
+  .day-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 4px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    position: relative;
+  }
+
+  .day-btn:hover:not(:disabled):not(.no-slots) {
+    background: rgba(124,58,237,0.12);
+    border-color: rgba(124,58,237,0.3);
+    color: #fff;
+  }
+
+  .day-btn.active {
+    background: rgba(124,58,237,0.2);
+    border-color: var(--color-purple-mid);
+    color: #fff;
+  }
+
+  .day-btn.past,
+  .day-btn.no-slots { opacity: 0.3; cursor: default; }
+
+  .day-name { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .day-num  { font-size: 17px; font-weight: 700; font-family: var(--font-display); }
+
+  .day-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--color-purple-mid);
+  }
+
+  /* ── Slots ───────────────────────────────────────────────── */
+  .slots-wrap { min-height: 180px; }
+
+  .slots-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 48px;
+  }
+
+  .slots-loading-text {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.35);
+    transition: opacity 0.2s ease;
+    min-height: 20px;
+  }
+
+  .slots-loading-text.fade-out { opacity: 0; }
+
+  .spinner {
+    width: 28px;
+    height: 28px;
+    border: 2px solid rgba(255,255,255,0.1);
+    border-top-color: var(--color-purple-mid);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .slots-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .slot-btn {
+    position: relative;
+    overflow: hidden;
+    padding: 14px 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    color: rgba(255,255,255,0.8);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+  }
+
+  .slot-time, .slot-confirm {
+    display: block;
+    transition: opacity 0.15s, transform 0.15s;
+  }
+
+  .slot-confirm {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(4px);
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  .slot-btn:hover {
+    background: var(--color-purple-mid);
+    border-color: var(--color-purple-mid);
+    color: #fff;
+  }
+
+  .slot-btn:hover .slot-time { opacity: 0; transform: translateY(-4px); }
+  .slot-btn:hover .slot-confirm { opacity: 1; transform: translateY(0); }
+
+  .slots-empty {
+    display: none;
+    text-align: center;
+    color: rgba(255,255,255,0.3);
+    font-size: 14px;
+    padding: 40px 0;
+  }
+
+  .slot-btn.loading {
+    background: rgba(124,58,237,0.2);
+    border-color: var(--color-purple-mid);
+    pointer-events: none;
+  }
+
+  .slots-error {
+    font-size: 13px;
+    color: #f87171;
+    text-align: center;
+    margin-top: 12px;
+  }
+
+  /* ── Confirm step ────────────────────────────────────────── */
+  .back-btn {
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.4);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 24px;
+    transition: color 0.2s;
+  }
+  .back-btn:hover { color: #fff; }
+
+  .confirm-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  label {
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.4);
+  }
+
+  input[type="text"],
+  input[type="email"] {
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: #fff;
+    background: rgba(255,255,255,0.05);
+    border: 1.5px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 14px 18px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  input[type="text"]::placeholder,
+  input[type="email"]::placeholder { color: rgba(255,255,255,0.2); }
+
+  input[type="text"]:focus,
+  input[type="email"]:focus {
+    border-color: var(--color-purple-mid);
+    background: rgba(124,58,237,0.08);
+  }
+
+  .btn-confirm {
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    background: var(--color-purple-mid);
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+    margin-top: 4px;
+  }
+
+  .btn-confirm:hover:not(:disabled) {
+    background: var(--color-purple);
+    transform: translateY(-1px);
+  }
+
+  .btn-confirm:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .confirm-error {
+    font-size: 13px;
+    color: #f87171;
+    min-height: 18px;
+  }
+
+  /* ── Booking loader ──────────────────────────────────────── */
+  .booking-loader {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    background: #0f0d1a;
+    border-radius: 24px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+    padding: 40px;
+  }
+
+  .booking-loader.active {
+    display: flex;
+    animation: fadeIn 0.25s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .loader-ring {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 3px solid rgba(124, 58, 237, 0.15);
+    border-top-color: var(--color-purple-mid);
+    animation: spin 0.9s linear infinite;
+  }
+
+  .loader-text {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.55);
+    text-align: center;
+    max-width: 280px;
+    line-height: 1.5;
+    min-height: 24px;
+    transition: opacity 0.2s ease;
+  }
+
+  .loader-text.fade-out { opacity: 0; }
+
+  /* ── Success ─────────────────────────────────────────────── */
+  .success-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+    padding: 40px 24px;
+  }
+
+  .success-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(124,58,237,0.15);
+    border: 1.5px solid rgba(124,58,237,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    color: var(--color-purple-mid);
+  }
+
+  .success-wrap h3 {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  .success-wrap p {
+    font-size: 16px;
+    color: rgba(255,255,255,0.6);
+  }
+
+  .success-note {
+    font-size: 13px !important;
+    color: rgba(255,255,255,0.3) !important;
+  }
+
+  /* ── Responsive ──────────────────────────────────────────── */
+  @media (max-width: 560px) {
+    .modal-card { padding: 28px 20px; border-radius: 20px; }
+    .slots-grid { grid-template-columns: repeat(2, 1fr); }
+    .day-strip { grid-template-columns: repeat(4, 1fr); }
+  }
+</style>
