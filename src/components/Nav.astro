@@ -2,7 +2,9 @@
 ---
 
 <nav id="nav">
-  <a href="#" class="logo">narve<em>labs</em></a>
+  <a href="#" class="logo">
+    <img src="/logo-purple.png" alt="Narve Labs" class="logo-img" />
+  </a>
   <div class="nav-right">
     <a href="#services">What we do</a>
     <a href="#how">How it works</a>
@@ -33,17 +35,15 @@
   }
 
   .logo {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 21px;
-    letter-spacing: -0.5px;
-    color: var(--color-purple);
     text-decoration: none;
+    display: flex;
+    align-items: center;
   }
 
-  .logo em {
-    font-style: normal;
-    color: var(--color-purple-mid);
+  .logo-img {
+    height: 26px;
+    width: auto;
+    display: block;
   }
 
   .nav-right {

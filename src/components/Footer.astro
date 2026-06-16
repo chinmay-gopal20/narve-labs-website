@@ -2,7 +2,9 @@
 ---
 
 <footer>
-  <a href="#" class="logo">narve<em>labs</em></a>
+  <a href="#" class="logo">
+    <img src="/logo-white.png" alt="Narve Labs" class="logo-img" />
+  </a>
   <div class="f-links">
     <a href="#services">What we do</a>
     <a href="#uses">Who it's for</a>
@@ -26,17 +28,15 @@
   }
 
   .logo {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-size: 17px;
-    letter-spacing: -0.5px;
-    color: #fff;
     text-decoration: none;
+    display: flex;
+    align-items: center;
   }
 
-  .logo em {
-    font-style: normal;
-    color: var(--color-purple-mid);
+  .logo-img {
+    height: 26px;
+    width: auto;
+    display: block;
   }
 
   a {
